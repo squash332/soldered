@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>{{ product.name }} — {{ template_label }}</title>
+<style>
+  @page {
+    size: A4;
+    margin: 2.1cm 1.6cm 2.4cm 1.6cm;
+    @bottom-center {
+      content: element(footer);
+    }
+  }
+
+  :root {
+    --solder-purple: #5b2379;
+    --solder-blue: #23b9d6;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color: #1a1a1a;
+    font-size: 10.5pt;
+    line-height: 1.45;
+    margin: 0;
+  }
+
+  h1, h2, h3 { color: var(--solder-purple); margin: 0 0 0.3em; }
+  h1 { font-size: 20pt; }
+  h2 { font-size: 13pt; margin-top: 1.1em; }
+  h3 { font-size: 10.5pt; margin-top: 0.8em; }
+  p { margin: 0 0 0.6em; }
+  a { color: var(--solder-blue); }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0.4em 0 0.8em;
+    font-size: 9.5pt;
+  }
+  th, td {
+    text-align: left;
+    padding: 3pt 6pt;
+    border-bottom: 1px solid #e2e2e2;
+  }
+  th {
+    width: 45%;
+    font-weight: 600;
+    color: #444;
+  }
+
+  .brand-bar {
+    height: 6pt;
+    background: linear-gradient(to right, var(--solder-purple) 80%, var(--solder-blue) 80%);
+    margin-bottom: 14pt;
+  }
+
+  .footer {
+    position: running(footer);
+    display: table;
+    table-layout: fixed;
+    width: 100%;
+    font-size: 7.5pt;
+    color: #777;
+    border-top: 0.5pt solid #ddd;
+    padding-top: 4pt;
+  }
+  .footer span {
+    display: table-cell;
+    width: 33%;
+  }
+  .footer span:nth-child(2) { text-align: center; }
+  .footer span:nth-child(3) { text-align: right; }
+  .footer .page-num::after {
+    content: "Page " counter(page) " of " counter(pages);
+  }
+
+  {% block extra_style %}{% endblock %}
+</style>
+</head>
+<body>
+  <div class="footer">
+    <span>{{ product.name }} &middot; SKU {{ product.sku }}</span>
+    <span>Generated {{ generated_date }}</span>
+    <span class="page-num"></span>
+  </div>
+
+  <div class="brand-bar"></div>
+
+  {% block content %}{% endblock %}
+</body>
+</html>

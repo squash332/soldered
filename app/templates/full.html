@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h1>{{ product.name }}</h1>
+  <div class="short-description">{{ product.short_description | safe }}</div>
+  <div class="long-description">{{ product.long_description | safe }}</div>
+
+  {% for group in product.spec_groups %}
+  <h2>{{ group.label }}</h2>
+  <table>
+    {% for field in group.fields %}
+    <tr>
+      <th scope="row">{{ field.label }}</th>
+      <td>{{ field | human_value }}{% if field.unit %} {{ field.unit }}{% endif %}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% endfor %}
+
+  {% if product.variants|length > 1 %}
+  <h2>Variants</h2>
+  <table>
+    {% for v in product.variants %}
+    <tr>
+      <th scope="row">{{ v.sku }}</th>
+      <td>{{ v.name }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% endif %}
+
+  {% if product.in_the_box %}
+  <h2>What's in the box</h2>
+  <table>
+    {% for item in product.in_the_box %}
+    <tr>
+      <th scope="row">{{ item.quantity }} {{ item.name }}</th>
+      <td>{{ item.description or "" }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% endif %}
+
+  {% if product.pinout_image_url %}
+  <h2>Pinout</h2>
+  <img src="{{ product.pinout_image_url }}" alt="Pinout diagram" style="max-width: 100%;">
+  {% endif %}
+
+  {% if typical_applications %}
+  <h2>Typical applications</h2>
+  <p>{{ typical_applications }}</p>
+  {% endif %}
+
+  {% if product.resources %}
+  <h2>Resources and downloads</h2>
+  <table>
+    {% for r in product.resources %}
+    <tr>
+      <th scope="row">{{ r.label }}</th>
+      <td><a href="{{ r.href }}">{{ r.href }}</a>{% if r.badge %} ({{ r.badge }}){% endif %}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% endif %}
+{% endblock %}

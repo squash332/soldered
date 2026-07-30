@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]
+jinja2
+weasyprint
+pydantic
+requests
+beautifulsoup4
+lxml

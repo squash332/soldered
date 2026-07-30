@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h1>{{ product.name }}</h1>
+  <div class="short-description">{{ product.short_description | safe }}</div>
+
+  <h2>Key specifications</h2>
+  <table>
+    {% for spec in headline_specs %}
+    <tr>
+      <th scope="row">{{ spec.label }}</th>
+      <td>{{ spec.value }}{% if spec.unit %} {{ spec.unit }}{% endif %}</td>
+    </tr>
+    {% endfor %}
+  </table>
+
+  {% if connect_line %}
+  <h2>Getting started</h2>
+  <p>{{ connect_line }}</p>
+  {% endif %}
+{% endblock %}

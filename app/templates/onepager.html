@@ -2,14 +2,14 @@
 
 {% block content %}
   <h1>{{ product.name }}</h1>
-  <div class="short-description">{{ product.short_description | safe }}</div>
+  <div class="short-description">{{ product.short_description | normalize_desc | safe }}</div>
 
   <h2>Key specifications</h2>
   <table>
-    {% for spec in headline_specs %}
+    {% for row in headline_rows %}
     <tr>
-      <th scope="row">{{ spec.label }}</th>
-      <td>{{ spec.value }}{% if spec.unit %} {{ spec.unit }}{% endif %}</td>
+      <th scope="row">{{ row.label }}</th>
+      <td>{{ row.value }}</td>
     </tr>
     {% endfor %}
   </table>

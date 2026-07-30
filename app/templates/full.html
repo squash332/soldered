@@ -2,16 +2,16 @@
 
 {% block content %}
   <h1>{{ product.name }}</h1>
-  <div class="short-description">{{ product.short_description | safe }}</div>
-  <div class="long-description">{{ product.long_description | safe }}</div>
+  <div class="short-description">{{ product.short_description | normalize_desc | safe }}</div>
+  <div class="long-description">{{ product.long_description | normalize_desc | safe }}</div>
 
   {% for group in product.spec_groups %}
   <h2>{{ group.label }}</h2>
   <table>
-    {% for field in group.fields %}
+    {% for row in group.fields | display_rows %}
     <tr>
-      <th scope="row">{{ field.label }}</th>
-      <td>{{ field | human_value }}{% if field.unit %} {{ field.unit }}{% endif %}</td>
+      <th scope="row">{{ row.label }}</th>
+      <td>{{ row.value }}</td>
     </tr>
     {% endfor %}
   </table>

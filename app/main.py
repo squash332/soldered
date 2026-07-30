@@ -1,14 +1,15 @@
 from datetime import date
 from io import BytesIO
 
-from fastapi import FastAPI, Query, Request
+from fastapi import FastAPI, Query
 from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from weasyprint import HTML
 
 from app.cache import get_or_fetch
+from app.content import normalize_description
 from app.family_config import connect_line, headline_fields
-from app.labels import display_value
+from app.labels import display_rows
 from app.scraper import ProductNotFoundError
 from app.seed_products import SEED_PRODUCTS
 from app.typical_applications import typical_applications
@@ -20,7 +21,8 @@ jinja_env = Environment(
     loader=FileSystemLoader(TEMPLATES_DIR),
     autoescape=select_autoescape(["html"]),
 )
-jinja_env.filters["human_value"] = display_value
+jinja_env.filters["display_rows"] = display_rows
+jinja_env.filters["normalize_desc"] = normalize_description
 
 TEMPLATE_FILES = {"onepager": "onepager.html", "full": "full.html"}
 TEMPLATE_LABELS = {"onepager": "One-pager", "full": "Full datasheet"}
@@ -51,15 +53,8 @@ def generate_pdf(sku: str = Query(...), template: str = Query("onepager")):
         "typical_applications": typical_applications(sku),
     }
     if template == "onepager":
-        specs = []
-        for name in headline_fields(sku):
-            field = product.field(name)
-            if field is None:
-                continue
-            specs.append(
-                {"label": field.label, "value": display_value(field), "unit": field.unit}
-            )
-        context["headline_specs"] = specs
+        fields = [product.field(name) for name in headline_fields(sku)]
+        context["headline_rows"] = display_rows([f for f in fields if f is not None])
 
     html = jinja_env.get_template(TEMPLATE_FILES[template]).render(**context)
     pdf_bytes = HTML(string=html, base_url="https://solde.red").write_pdf()

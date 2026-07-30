@@ -4,6 +4,10 @@
   <h1>{{ product.name }}</h1>
   <div class="short-description">{{ product.short_description | normalize_desc | safe }}</div>
 
+  {% if what_it_does %}
+  <p class="what-it-does">{{ what_it_does }}</p>
+  {% endif %}
+
   <h2>Key specifications</h2>
   <table>
     {% for row in headline_rows %}

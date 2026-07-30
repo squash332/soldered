@@ -8,7 +8,7 @@ from weasyprint import HTML
 
 from app.cache import get_or_fetch
 from app.content import normalize_description
-from app.family_config import connect_line, headline_fields
+from app.family_config import connect_line, headline_fields, what_it_does
 from app.labels import display_rows
 from app.scraper import ProductNotFoundError
 from app.seed_products import SEED_PRODUCTS
@@ -55,6 +55,7 @@ def generate_pdf(sku: str = Query(...), template: str = Query("onepager")):
     if template == "onepager":
         fields = [product.field(name) for name in headline_fields(sku)]
         context["headline_rows"] = display_rows([f for f in fields if f is not None])
+        context["what_it_does"] = what_it_does(sku)
 
     html = jinja_env.get_template(TEMPLATE_FILES[template]).render(**context)
     pdf_bytes = HTML(string=html, base_url="https://solde.red").write_pdf()

@@ -65,3 +65,22 @@ FAMILY_CONNECT_LINE: dict[str, str] = {
 def connect_line(sku: str) -> str:
     family = SKU_FAMILY.get(sku)
     return FAMILY_CONNECT_LINE.get(family, "")
+
+
+# One "what it does" sentence per family for the one-pager (r2)
+FAMILY_WHAT_IT_DOES: dict[str, str | None] = {
+    "display": (
+        "Suits projects that show information for long periods without "
+        "draining a battery — signage, weather displays, status boards."
+    ),
+    "dev_board": (
+        "Suits battery-powered projects that spend most of their time "
+        "asleep — sensors, trackers, remote monitors."
+    ),
+    "sensor_breakout": None,
+}
+
+
+def what_it_does(sku: str) -> str | None:
+    family = SKU_FAMILY.get(sku)
+    return FAMILY_WHAT_IT_DOES.get(family)

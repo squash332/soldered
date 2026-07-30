@@ -31,6 +31,7 @@ FAMILY_HEADLINE_FIELDS: dict[str, list[str]] = {
         "measurement_accuracy",
         "interface",
         "supply_voltage_min_v",
+        "supply_voltage_max_v",
     ],
 }
 

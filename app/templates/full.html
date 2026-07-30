@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% import "_macros.html" as macros %}
 
 {% block content %}
   <h1>{{ product.name }}</h1>
@@ -7,15 +8,13 @@
 
   {% for group in product.spec_groups %}
   <h2>{{ group.label }}</h2>
-  <table>
-    {% for row in group.fields | display_rows %}
-    <tr>
-      <th scope="row">{{ row.label }}</th>
-      <td>{{ row.value }}</td>
-    </tr>
-    {% endfor %}
-  </table>
+  {{ macros.spec_table(group.fields | display_rows) }}
   {% endfor %}
+
+  {% if technical_details_rows %}
+  <h2>Specifications</h2>
+  {{ macros.spec_table(technical_details_rows) }}
+  {% endif %}
 
   {% if product.variants|length > 1 %}
   <h2>Variants</h2>

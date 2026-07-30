@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% import "_macros.html" as macros %}
 
 {% block content %}
   <h1>{{ product.name }}</h1>
@@ -8,15 +9,10 @@
   <p class="what-it-does">{{ what_it_does }}</p>
   {% endif %}
 
+  {% if headline_rows %}
   <h2>Key specifications</h2>
-  <table>
-    {% for row in headline_rows %}
-    <tr>
-      <th scope="row">{{ row.label }}</th>
-      <td>{{ row.value }}</td>
-    </tr>
-    {% endfor %}
-  </table>
+  {{ macros.spec_table(headline_rows) }}
+  {% endif %}
 
   {% if connect_line %}
   <h2>Getting started</h2>

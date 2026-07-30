@@ -1,7 +1,4 @@
-# DRAFT per-SKU copy, ~80-120 words each, for the full datasheet's "Typical
-# Applications" section. Grounded in the scraped spec/description data, not
-# yet run through the separate tone-of-voice/content review pass — swap in
-# vetted copy there before shipping.
+# DRAFT copy, not yet through the tone-of-voice review pass.
 TYPICAL_APPLICATIONS: dict[str, str] = {
     "333232": (
         "Inkplate 6 suits projects that show information for long periods "

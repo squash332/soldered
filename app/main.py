@@ -7,7 +7,7 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 from weasyprint import HTML
 
 from app.cache import get_or_fetch
-from app.content import normalize_description
+from app.content import normalize_description, parse_technical_details
 from app.family_config import connect_line, headline_fields, what_it_does
 from app.labels import display_rows
 from app.scraper import ProductNotFoundError
@@ -45,17 +45,26 @@ def generate_pdf(sku: str = Query(...), template: str = Query("onepager")):
     except ProductNotFoundError:
         return RedirectResponse(f"/?error=No product found for SKU '{sku}'")
 
+    # Fallback for products with no structured spec_groups (e.g. a battery).
+    technical_details_rows = (
+        parse_technical_details(product.technical_details)
+        if not product.spec_groups and product.technical_details
+        else []
+    )
+
     context = {
         "product": product,
         "template_label": TEMPLATE_LABELS[template],
         "generated_date": date.today().isoformat(),
-        "connect_line": connect_line(sku),
+        "connect_line": connect_line(product, technical_details_rows),
         "typical_applications": typical_applications(sku),
+        "technical_details_rows": technical_details_rows,
     }
     if template == "onepager":
-        fields = [product.field(name) for name in headline_fields(sku)]
-        context["headline_rows"] = display_rows([f for f in fields if f is not None])
-        context["what_it_does"] = what_it_does(sku)
+        fields = [product.field(name) for name in headline_fields(product)]
+        headline_rows = display_rows([f for f in fields if f is not None])
+        context["headline_rows"] = headline_rows or technical_details_rows[:6]
+        context["what_it_does"] = what_it_does(product)
 
     html = jinja_env.get_template(TEMPLATE_FILES[template]).render(**context)
     pdf_bytes = HTML(string=html, base_url="https://solde.red").write_pdf()

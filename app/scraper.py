@@ -1,5 +1,4 @@
 import json
-import re
 
 import requests
 from bs4 import BeautifulSoup
@@ -64,6 +63,7 @@ def fetch_product(sku: str) -> Product:
         pinout_image_url=_parse_pinout(soup),
         resources=_parse_resources(soup),
         variants=_parse_variants(soup),
+        categories=_parse_categories(soup),
         fetched_at=utcnow(),
     )
 
@@ -121,6 +121,16 @@ def _parse_resources(soup: BeautifulSoup) -> list[ResourceLink]:
                 )
             )
     return links
+
+
+def _parse_categories(soup: BeautifulSoup) -> list[str]:
+    # A product can belong to more than one collection; order preserved.
+    seen: list[str] = []
+    for root_el in soup.select(".hero-collection-root"):
+        name = root_el.get_text(strip=True)
+        if name and name not in seen:
+            seen.append(name)
+    return seen
 
 
 def _parse_variants(soup: BeautifulSoup) -> list[Variant]:

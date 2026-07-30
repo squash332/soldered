@@ -2,9 +2,7 @@ import re
 
 from app.models import SpecField
 
-# Explicit mapping for raw enum-style values solde.red does not humanize itself.
-# Keyed by raw value, not field name, since values like "yes"/"no" recur across
-# unrelated fields.
+# Keyed by raw value, not field name — "yes"/"no" etc. recur across unrelated fields.
 ENUM_LABELS: dict[str, str] = {
     "yes": "Yes",
     "no": "No",
@@ -21,14 +19,9 @@ ENUM_LABELS: dict[str, str] = {
 _HEX_CODE = re.compile(r"^0x[0-9a-fA-F]+$")
 _SNAKE_CODE = re.compile(r"^[a-z0-9]+(_[a-z0-9]+)*$")
 
-# Free-text spec values (e.g. measurement_range/measurement_accuracy) carry raw
-# notation the site never converts. General text-level fixes, not per-field:
-# any "+/-" becomes "±", and any "<number> C" (single or as an X to Y range)
-# becomes proper degree-Celsius notation.
+# Fixes raw notation in free-text spec values: "+/-" -> "±", "<number> C" -> "°C".
+# (?<![\w.]) keeps it from firing inside a glued code like "I2C" or "SHTC3".
 _PLUS_MINUS = re.compile(r"\+/-\s*")
-# (?<![\w.]) keeps this from firing inside a code like "I2C" or "SHTC3", where
-# the digit right before "C" is glued to a letter rather than standing alone
-# as a measurement.
 _TEMP_RANGE = re.compile(r"(?<![\w.])(-?\d+(?:\.\d+)?)\s+to\s+(-?\d+(?:\.\d+)?)\s*C\b")
 _TEMP_SINGLE = re.compile(r"(?<![\w.])(-?\d+(?:\.\d+)?)\s*C\b")
 
@@ -58,15 +51,12 @@ def display_value(field: SpecField) -> str:
     return _normalize_unit_notation(text)
 
 
-# Renames for solde.red's auto-generated (title-cased snake_case) field labels
-# that read poorly in a customer-facing document. Keyed by field `name`, so a
-# field carries its fixed label wherever it appears (headline specs or full
-# spec tables), not per-template.
+# Renames for auto-generated field labels that read poorly, keyed by field name.
 FIELD_LABEL_OVERRIDES: dict[str, str] = {
     "mcu_part_number": "Microcontroller",
     "rtc_onboard": "Real-time clock",
     "has_enclosure": "Enclosure included",
-    "ic_part_number": "Sensor IC",
+    "ic_part_number": "IC",
     "sleep_current_ua": "Sleep current",
 }
 
@@ -75,9 +65,7 @@ def field_label(field: SpecField) -> str:
     return FIELD_LABEL_OVERRIDES.get(field.name, field.label)
 
 
-# Unit inferred from a field-name suffix when solde.red's own `unit` value is
-# empty. General rule keyed on unit *type*, not a per-field patch, so a new
-# field like `standby_current_ua` next month is covered automatically.
+# Unit inferred from a field-name suffix when solde.red's own `unit` is empty.
 UNIT_SUFFIX_MAP: dict[str, str] = {
     "_ua": "µA",
     "_ma": "mA",
@@ -103,10 +91,7 @@ def _field_text(field: SpecField) -> str:
     return f"{value} {unit}" if unit else value
 
 
-# Pairs of raw fields that read better combined into a single spec row than as
-# two separate ones. Keyed by the field `name`s involved, so it applies
-# uniformly wherever that pair of fields shows up (headline specs or full spec
-# tables), not per template.
+# Field-name pairs that read better combined into one spec row.
 FIELD_COMBINATIONS: list[dict] = [
     {
         "fields": ("display_resolution_w", "display_resolution_h"),
@@ -124,9 +109,7 @@ FIELD_COMBINATIONS: list[dict] = [
 
 
 def display_rows(fields: list[SpecField]) -> list[dict]:
-    """Render-ready {label, value} rows: combined pairs merged, labels
-    overridden, units filled in — the single place spec tables and headline
-    specs both go through, so they can't drift apart."""
+    """Render-ready {label, value} rows: pairs combined, labels/units resolved."""
     by_name = {f.name: f for f in fields}
     order = {f.name: i for i, f in enumerate(fields)}
     consumed: set[str] = set()

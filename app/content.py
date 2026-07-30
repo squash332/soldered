@@ -2,18 +2,13 @@ import re
 
 from bs4 import BeautifulSoup
 
-# "Dasduino" is the retired name of the product line NULA replaced (see
-# handoff brief: "NULA, not Dasduino"). Its old product pages, including
-# soldered.com/products/dasduino-core referenced in the SHTC3 copy, now
-# redirect to a generic catalog page rather than a live product — confirmed
-# by fetching both URL variants. Any scraped copy still naming it is stale
-# pre-rebrand text, not a reference to a distinct product still sold today.
+# "Dasduino" is NULA's retired name; its old product pages 404 to a generic
+# catalog page now, so any mention is stale, not a real distinct product.
 _DASDUINO_RE = re.compile(r"Dasduino(?:\s+Core)?", re.IGNORECASE)
 _DEAD_DASDUINO_HOSTS = ("soldered.com/products/dasduino", "soldered.com/product/dasduino")
 
-# Specific, verified proofreading fixes in the scraped copy — corrected as
-# exact strings rather than a general "it's" -> "its" rule, since a blanket
-# rule would also wrongly rewrite legitimate "it's" (= "it is") elsewhere.
+# Exact-string fixes, not a blanket "it's"->"its" rule (that would also break
+# legitimate "it is" usages elsewhere).
 _KNOWN_TYPOS = {
     "Due to it's ample connectivity": "Due to its ample connectivity",
 }
@@ -41,14 +36,6 @@ def _normalize_text_node(text: str) -> str:
 
 
 def normalize_description(html: str) -> str:
-    """Tone-of-voice pass over scraped description HTML: drop forced
-    exclamation marks, fix known proofreading errors, space numbers apart
-    from units the site glues together, and replace mentions of the retired
-    "Dasduino" product line with its current name, NULA.
-
-    Runs only on text nodes, never on the serialized HTML string, so it can't
-    corrupt an href/src attribute that happens to contain a matching
-    substring (e.g. a URL slug like ".../16x2-i2c-...")."""
     soup = BeautifulSoup(html, "html.parser")
 
     for a in soup.find_all("a"):
@@ -61,3 +48,21 @@ def normalize_description(html: str) -> str:
         node.replace_with(_normalize_text_node(str(node)))
 
     return str(soup)
+
+
+def parse_technical_details(html: str) -> list[dict]:
+    """Spec rows parsed from technical_details prose, for products with no spec_groups."""
+    soup = BeautifulSoup(normalize_description(html), "html.parser")
+    rows = []
+    for li in soup.find_all("li"):
+        strong = li.find("strong")
+        if strong is None:
+            label = li.get_text(" ", strip=True)
+            value = ""
+        else:
+            label = strong.get_text(strip=True).rstrip(":").strip()
+            strong.extract()
+            value = li.get_text(" ", strip=True)
+        if label:
+            rows.append({"label": label, "value": value})
+    return rows

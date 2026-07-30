@@ -48,6 +48,7 @@ class Product(BaseModel):
     pinout_image_url: str | None = None
     resources: list[ResourceLink]
     variants: list[Variant]
+    categories: list[str] = []
     fetched_at: datetime
 
     def all_fields(self) -> list[SpecField]:
